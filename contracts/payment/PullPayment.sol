@@ -1,7 +1,7 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.18;
 
 
-import '../SafeMath.sol';
+import '../math/SafeMath.sol';
 
 
 /**
@@ -28,23 +28,16 @@ contract PullPayment {
   /**
   * @dev withdraw accumulated balance, called by payee.
   */
-  function withdrawPayments() {
+  function withdrawPayments() public {
     address payee = msg.sender;
     uint256 payment = payments[payee];
 
-    if (payment == 0) {
-      throw;
-    }
-
-    if (this.balance < payment) {
-      throw;
-    }
+    require(payment != 0);
+    require(this.balance >= payment);
 
     totalPayments = totalPayments.sub(payment);
     payments[payee] = 0;
 
-    if (!payee.send(payment)) {
-      throw;
-    }
+    assert(payee.send(payment));
   }
 }
